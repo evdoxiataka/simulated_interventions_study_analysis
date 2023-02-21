@@ -1,6 +1,6 @@
 # study2_analysis
 
-
+Analysis framework for the evaluation user study of the simulated interventions' data visualizations.
 
 ## Getting started
 
