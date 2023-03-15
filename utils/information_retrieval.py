@@ -63,6 +63,24 @@ def _opts_per_task(t_options, t_ids, remove_both = False):
                         corr_per_task[row[0]].append(row[1])
     return opts_per_task, corr_per_task
 
+def _opts_per_task_T2(t_options, t_ids):
+    """
+        t_options: task options as retrieved by database (List of tuples)
+    """
+    opts_per_task={}
+    corr_per_task = {}
+    for i,row in enumerate(t_options):
+        if row[0] in t_ids:
+            if row[0] not in opts_per_task:
+                opts_per_task[row[0]] = []
+            if row[0] not in corr_per_task:
+                corr_per_task[row[0]] = []  
+            if 'None' not in row[1] and 'Causal' not in row[1]:
+                opts_per_task[row[0]].append(row[1])
+                if row[2]:
+                    corr_per_task[row[0]].append(row[1])
+    return opts_per_task, corr_per_task
+
 def _answers_per_task(participants, t_ids, data, get_from_opt = True):
     """
         participants: List of participants id to consinder
@@ -91,7 +109,7 @@ def _answers_per_task(participants, t_ids, data, get_from_opt = True):
                 answers_per_task[t].append(answers)
     return answers_per_task
 
-def get_hamming_distance(t_options, participants, t_ids, data):
+def get_hamming_distance(t_options, participants, t_ids, data, tt):
     """
         Returns hamming distance of participants answers from correct answers of t_ids tasks
         
@@ -100,7 +118,10 @@ def get_hamming_distance(t_options, participants, t_ids, data):
         t_ids:        List of task ids we want to get hamming distance for
         data:         Dict with processed data from database
     """
-    opts_per_task, corr_answ_per_task = _opts_per_task(t_options, t_ids, remove_both = True)
+    if tt == 'T1':
+        opts_per_task, corr_answ_per_task = _opts_per_task(t_options, t_ids, remove_both = True)
+    else:
+        opts_per_task, corr_answ_per_task = _opts_per_task_T2(t_options, t_ids)
     # print("opt", opts_per_task)
     # print("corr", corr_answ_per_task)
     answers_per_task = _answers_per_task(participants, t_ids, data)
@@ -256,7 +277,7 @@ def get_confidence_per_tt(data_processed, t_ids, db_file_path):
                                    t_ids['T2'], data_processed)
     return conf_i, conf_s, conf_a
 
-def get_answers_scores_multiple_sel(data_processed, t_ids, db_file_path):
+def get_answers_scores_multiple_sel(data_processed, t_ids, db_file_path, tt):
     """
         t_ids: List of task_ids for a specific TT
     """
@@ -273,17 +294,17 @@ def get_answers_scores_multiple_sel(data_processed, t_ids, db_file_path):
     corr_answers_i = []
     corr_answers_i = get_hamming_distance(t_options, 
                                                  participants_i, t_ids, 
-                                                 data_processed)
+                                                 data_processed, tt)
 
     corr_answers_s = []
     corr_answers_s = get_hamming_distance(t_options, 
                                                  participants_s, t_ids, 
-                                                 data_processed)
+                                                 data_processed, tt)
     
     corr_answers_a = []
     corr_answers_a = get_hamming_distance(t_options, 
                                                  participants_a, t_ids, 
-                                                 data_processed)
+                                                 data_processed, tt)
     
     return corr_answers_i, corr_answers_s, corr_answers_a
 

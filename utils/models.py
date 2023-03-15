@@ -72,6 +72,35 @@ def get_confidence_inference(conf_i, conf_s, conf_a, t_indices_i, t_indices_s, t
         posterior_predictive = pm.sample_posterior_predictive(trace, samples=2000)
     return trace, posterior_predictive
 
+def get_inference_categ(answers_i, answers_s, answers_a, t_indices_i, t_indices_s, t_indices_a, t_ids):
+    """
+        answers_i: List of success for all tasks in rq1 for all interactive participants
+        n:         List of trials size (number of available options) per task in rq1
+        t_indices: List of indexes to rq1 tasks for all observations in answers_i or answers_s
+        t_ids:     List of Strings with tasks ids
+    """    
+    coords = {"task": t_ids}
+    with pm.Model(coords=coords) as model:
+        #priors
+        pIG = pm.Dirichlet("pIG", a=np.array([0.5,0.5,0.5]), dims = 'task')#probability of correct choice
+        pSG = pm.Dirichlet("pSG", a=np.array([0.5,0.5,0.5]), dims = 'task')
+        pAG = pm.Dirichlet("pAG", a=np.array([0.5,0.5,0.5]), dims = 'task')
+
+        #likelihood        
+        accuracyIG = pm.Categorical("accuracyIG", p = pIG[t_indices_i], observed = answers_i)
+        accuracySG = pm.Categorical("accuracySG", p = pSG[t_indices_s], observed = answers_s)
+        accuracyAG = pm.Categorical("accuracyAG", p = pAG[t_indices_a], observed = answers_a)
+        
+        #comparisons
+        # diff_of_thetas_IG_SG = pm.Deterministic("difference of thetas IG-SG", thetaIG - thetaSG, dims='task')
+        # diff_of_thetas_IG_AG = pm.Deterministic("difference of thetas IG-AG", thetaIG - thetaAG, dims='task')
+        # diff_of_thetas_SG_AG = pm.Deterministic("difference of thetas SG-AG", thetaSG - thetaAG, dims='task')
+       
+        #inference
+        trace = pm.sample(2000)
+        posterior_predictive = pm.sample_posterior_predictive(trace, samples=2000)
+    return trace, posterior_predictive
+
 def get_inference_multi(answers_i, answers_s, answers_a, n_i, n_s, n_a, t_indices_i, t_indices_s, t_indices_a, t_ids):
     """
         answers_i: List of success for all tasks in rq1 for all interactive participants
