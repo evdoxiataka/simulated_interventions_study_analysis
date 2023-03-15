@@ -53,16 +53,17 @@ def _opts_per_task(t_options, t_ids, remove_both = False):
             if row[0] not in corr_per_task:
                 corr_per_task[row[0]] = []  
             if 'None' not in row[1]:
-                if 'Both' in row[1] and remove_both:
+                if 'Both' in row[1] and row[2] and remove_both:
                     corr_per_task[row[0]].append(t_options[i-2][1])
                     corr_per_task[row[0]].append(t_options[i-1][1])
                 else:
-                    opts_per_task[row[0]].append(row[1])
+                    if not ('Both' in row[1] and remove_both):
+                        opts_per_task[row[0]].append(row[1])
                     if row[2]:
                         corr_per_task[row[0]].append(row[1])
     return opts_per_task, corr_per_task
 
-def _answers_per_task(participants, t_ids, data):
+def _answers_per_task(participants, t_ids, data, get_from_opt = True):
     """
         participants: List of participants id to consinder
         t_ids:        List of Strings of task ids
@@ -74,9 +75,19 @@ def _answers_per_task(participants, t_ids, data):
             if t in data[p]['t_answers']:
                 if t not in answers_per_task:
                     answers_per_task[t] = []
-                answers = data[p]['t_answers'][t]['options']
-                if data[p]['t_answers'][t]['model_opt'] != "":
-                    answers.append(data[p]['t_answers'][t]['model_opt'])
+                if get_from_opt:
+                    answers = []
+                    for ans in data[p]['t_answers'][t]['options']:
+                        if ans not in answers: ## remove cases where users' response was stored in db more than 1 times due to a bug
+                            if 'Both' in ans:
+                                answers.append('Causal Model 1')
+                                answers.append('Causal Model 2')
+                            else:
+                                answers.append(ans)
+                    # answers = data[p]['t_answers'][t]['options']
+                else:
+                # if data[p]['t_answers'][t]['model_opt'] != "":
+                    answers = [data[p]['t_answers'][t]['model_opt']]
                 answers_per_task[t].append(answers)
     return answers_per_task
 
@@ -90,7 +101,10 @@ def get_hamming_distance(t_options, participants, t_ids, data):
         data:         Dict with processed data from database
     """
     opts_per_task, corr_answ_per_task = _opts_per_task(t_options, t_ids, remove_both = True)
+    # print("opt", opts_per_task)
+    # print("corr", corr_answ_per_task)
     answers_per_task = _answers_per_task(participants, t_ids, data)
+    # print("ans",answers_per_task)
     return get_hamming_distances_per_task(opts_per_task, corr_answ_per_task, answers_per_task)
     
 def get_hamming_distances_per_task(opts_per_task, cor_answ_per_task, answers_per_task):
@@ -107,7 +121,7 @@ def get_hamming_distances_per_task(opts_per_task, cor_answ_per_task, answers_per
                 binary_vec_corr = binary_vec_corr+"1"
             else:
                 binary_vec_corr = binary_vec_corr+"0"  
-            ans = ""
+            # ans = ""
             for i,answer in enumerate(answers_per_task[t]):
                 if o in answer:
                     binary_vecs_answ[i] = binary_vecs_answ[i]+"1"
@@ -128,7 +142,7 @@ def _hamming_distance(binary_corr_answer, binary_answers):
         hamming_distances.append(sum(c1 == c2 for c1, c2 in zip(ans, binary_corr_answer)))   
     return hamming_distances
 
-def get_corr_answers_models(t_options, participants, t_ids, data):
+def get_p_answers_digital(t_options, participants, t_ids, data):
     """
         t_options:    Task options as retrieved from database
         participants: List of participants id to consinder
@@ -136,23 +150,25 @@ def get_corr_answers_models(t_options, participants, t_ids, data):
         data:         Dict with processed data from database
     """
     _, corr_answ_per_task = _opts_per_task(t_options, t_ids)
-    corr_answ = {}
+    # print('corr',corr_answ_per_task)
+    p_answ_digital = {}
     for p in participants:
         for t in t_ids:
             if t in data[p]['t_answers']:
-                if t not in corr_answ:
-                    corr_answ[t] = []
+                if t not in p_answ_digital:
+                    p_answ_digital[t] = []
                 # corr_answ = [s for s in corr_answ_per_task[t] if "Causal" in s][0]
-                p_answ = [s for s in data[p]['t_answers'][t]['options'] if "Causal" in s]
+                p_answ = [s for s in data[p]['t_answers'][t]['options'] if ("Causal" in s or "Both" in s)]
                 if len(p_answ) == 0:
                     p_answ = data[p]['t_answers'][t]['model_opt']
                 else:
                     p_answ = p_answ[0]
+                # print(t,p,p_answ)
                 if p_answ in corr_answ_per_task[t]:
-                    corr_answ[t].append(1)
+                    p_answ_digital[t].append(1)
                 else:
-                    corr_answ[t].append(0)
-    return corr_answ
+                    p_answ_digital[t].append(0)
+    return p_answ_digital
     
 # CONFIDENCE
 def get_confidence(participants, t_ids, data):
@@ -286,17 +302,17 @@ def get_answers_scores_single_sel(data_processed, t_ids, db_file_path):
     ## get correct answers per rq
     t_options = get_t_options(db_file_path)
     corr_answers_i = []
-    corr_answers_i = get_corr_answers_models(t_options, 
+    corr_answers_i = get_p_answers_digital(t_options, 
                                              participants_i, t_ids, 
                                              data_processed)
 
     corr_answers_s = []
-    corr_answers_s = get_corr_answers_models(t_options, 
+    corr_answers_s = get_p_answers_digital(t_options, 
                                              participants_s, t_ids, 
                                              data_processed)
     
     corr_answers_a = []
-    corr_answers_a = get_corr_answers_models(t_options, 
+    corr_answers_a = get_p_answers_digital(t_options, 
                                              participants_a, t_ids, 
                                              data_processed)
     
