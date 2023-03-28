@@ -13,6 +13,26 @@ def get_d_questions(conn):
         print(e)
         return [] 
 
+def get_d_options(db_file):
+    try:
+        conn = None
+        conn = create_connection(db_file)
+        r = []
+        if conn:
+            cur = conn.cursor()    
+            cur.execute("SELECT d_name,option FROM d_options")
+            r = cur.fetchall()
+            close_connection(conn)
+        d_options = {}
+        for row in r:
+            if row[0] not in d_options:
+                d_options[row[0]] = []
+            d_options[row[0]].append(row[1])
+        return d_options
+    except Error as e:
+        print(e)
+        return []
+    
 def get_participants(db_file):
     try:
         conn = None
