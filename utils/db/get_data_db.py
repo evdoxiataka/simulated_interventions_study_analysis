@@ -250,6 +250,23 @@ def get_d_answers_where(db_file, p_id):
     except Error as e:
         print(e)
         return []
+    
+def get_ue_answers_where(db_file, p_id):
+    try:
+        conn = None
+        conn = create_connection(db_file)
+        r = []
+        if conn:
+            cur = conn.cursor()    
+            cur.execute("SELECT ue_name, slider_value, text FROM ue_answers WHERE participant_id=?",(p_id,))
+            # r = cur.fetchall()
+            r = [dict((cur.description[i][0], value) \
+            for i, value in enumerate(row)) for row in cur.fetchall()]  
+            close_connection(conn)
+        return r
+    except Error as e:
+        print(e)
+        return []
 
 def get_t_answers(db_file):
     try:
@@ -511,6 +528,20 @@ def get_data_json(db_file):
                         if d_a_k=="d_name":
                             continue
                         p["d_answers"][d_name][d_a_k] = d_a_v
+            # for key,value in p.items():
+            #     if key!="name":
+            #         r[p_id][key] = value 
+            ## user experience
+            ue_answers = get_ue_answers_where(db_file, p_id)  
+            p["ue_answers"] = {} 
+            for ue_a in ue_answers:
+                if "ue_name" in ue_a:
+                    ue_name = ue_a["ue_name"]
+                    p["ue_answers"][ue_name] = {}
+                    for d_a_k, d_a_v in ue_a.items():
+                        if d_a_k=="ue_name":
+                            continue
+                        p["ue_answers"][ue_name][d_a_k] = d_a_v
             for key,value in p.items():
                 if key!="name":
                     r[p_id][key] = value 
