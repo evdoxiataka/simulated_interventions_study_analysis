@@ -8,14 +8,14 @@ def get_times_inference(times_i, times_s, times_a, t_indices_i, t_indices_s, t_i
     coords = {"task": t_ids}
     with pm.Model(coords=coords) as model:
         ## priors
-        groupIG_mean = pm.Normal("groupIG_mean", mu = 120, sd = 500, dims = 'task')
-        groupIG_std = pm.HalfNormal("groupIG_std", sd = 500, dims = 'task')
+        groupIG_mean = pm.Normal("groupIG_mean", mu = 120, sd = 50, dims = 'task')
+        groupIG_std = pm.HalfNormal("groupIG_std", sd = 50, dims = 'task')
         
-        groupSG_mean = pm.Normal("groupSG_mean", mu = 120, sd = 500, dims = 'task')        
-        groupSG_std = pm.HalfNormal("groupSG_std", sd = 500, dims = 'task')
+        groupSG_mean = pm.Normal("groupSG_mean", mu = 120, sd = 50, dims = 'task')        
+        groupSG_std = pm.HalfNormal("groupSG_std", sd = 50, dims = 'task')
         
-        groupAG_mean = pm.Normal("groupAG_mean", mu = 120, sd = 500, dims = 'task')        
-        groupAG_std = pm.HalfNormal("groupAG_std", sd = 500, dims = 'task')
+        groupAG_mean = pm.Normal("groupAG_mean", mu = 120, sd = 50, dims = 'task')        
+        groupAG_std = pm.HalfNormal("groupAG_std", sd = 50, dims = 'task')
 
         ## likelihood  
         rtIG = pm.Normal("rtIG", mu = groupIG_mean[t_indices_i], sd = groupIG_std[t_indices_i], observed = times_i)# sec
