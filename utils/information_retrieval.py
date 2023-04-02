@@ -277,7 +277,7 @@ def get_confidence_per_tt(data_processed, t_ids, db_file_path):
                                    t_ids['T2'], data_processed)
     return conf_i, conf_s, conf_a
 
-def get_answers_scores_multiple_sel(data_processed, t_ids, db_file_path, tt):
+def get_answers_scores_MCO(data_processed, t_ids, db_file_path, tt):
     """
         t_ids: List of task_ids for a specific TT
     """
@@ -308,7 +308,7 @@ def get_answers_scores_multiple_sel(data_processed, t_ids, db_file_path, tt):
     
     return corr_answers_i, corr_answers_s, corr_answers_a
 
-def get_answers_scores_single_sel(data_processed, t_ids, db_file_path):
+def get_answers_scores_SCO(data_processed, t_ids, db_file_path):
     """
         t_ids: List of task_ids for a specific TT
     """
