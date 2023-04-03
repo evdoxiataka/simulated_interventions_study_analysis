@@ -642,7 +642,7 @@ def get_questions(db_file):
     return qa
 
 if __name__ == '__main__':
-    database = "C:/evdoxiataka/PhD/Projects/study2/utils/db/study_02.db"
+    database = "/data/study_02.db"
     # print(get_p_t(database))
     print(get_t_answers(database))    
     # print(get_t_answers_opts(database))

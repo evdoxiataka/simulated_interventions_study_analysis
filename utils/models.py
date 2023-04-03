@@ -301,42 +301,4 @@ def get_inference_SCO_LA2(answers_i, answers_s, answers_a, t_indices_i, t_indice
 #         posterior_predictive = pm.sample_posterior_predictive(trace, samples=2000)
 #     return trace, posterior_predictive
 
-# def get_len_boxes_inference(len_boxes, t_ids,  t_indices):
-#     """
-#         len_boxes:    List of length of selectin box for each participant and variable in each task
-#         t_ids:        List of task ids e.g. t1, t2, t3 ....
-#         t_indices:    List of indices to task ids for each observation in len_boxes
-#     """    
-#     coords = {"task": t_ids}
-#     with pm.Model(coords=coords) as model:
-#         #priors
-#         mu = pm.Normal("mu", mu = 0, sigma = 10, dims='task')
-#         sigma = pm.HalfNormal("sigma", sd = 10, dims='task')
 
-#         #likelihood                
-#         len_box = pm.Normal("len_box", mu = mu[t_indices], sigma = sigma[t_indices], observed = len_boxes)#length of selection box
-
-#         #inference
-#         trace = pm.sample(2000)
-#         posterior_predictive = pm.sample_posterior_predictive(trace, samples=2000)
-#     return trace, posterior_predictive
-
-# def get_num_boxes_inference(num_boxes, t_ids,  t_indices):
-#     """
-#         num_boxes:    List of number of selectin boxes for each variable in each task
-#         t_ids:        List of task ids e.g. t1, t2, t3 ....
-#         t_indices:    List of indices to task ids for each observation in num_boxes
-#     """    
-#     coords = {"task": t_ids}
-#     with pm.Model(coords=coords) as model:
-#         #priors
-#         psi = pm.Beta("psi", alpha = 1, beta = 1, dims='task')
-#         mu = pm.Gamma("mu", alpha = 1, beta = 30, dims='task')
-
-#         #likelihood                
-#         num_box = pm.ZeroInflatedPoisson("num_box", theta = mu[t_indices], psi = psi[t_indices], observed = num_boxes)#number of selection boxes
-
-#         #inference
-#         trace = pm.sample(2000)
-#         posterior_predictive = pm.sample_posterior_predictive(trace, samples=2000)
-#     return trace, posterior_predictive

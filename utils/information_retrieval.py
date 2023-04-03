@@ -1,7 +1,6 @@
 import pandas as pd
 import json
 import numpy as np
-# import arviz as az
 from utils.db.get_data_db import get_t_options
 
 ## RESPONSE TIMES
@@ -22,24 +21,6 @@ def get_times_for_tt(participants, t_ids, data):
     return times
 
 ## CORRECT ANSWERS
-# def _opts_per_task(t_options, t_ids):
-#     """
-#         t_options: task options as retrieved by database (List of tuples)
-#     """
-#     opts_per_task={}
-#     corr_per_task = {}
-#     for row in t_options:
-#         if row[0] in t_ids:
-#             if row[0] not in opts_per_task:
-#                 opts_per_task[row[0]] = []
-#             if row[0] not in corr_per_task:
-#                 corr_per_task[row[0]] = []
-#             if row[1] != 'non':
-#                 opts_per_task[row[0]].append(row[1])
-#                 if row[2]:
-#                     corr_per_task[row[0]].append(row[1])
-#     return opts_per_task, corr_per_task
-
 def _opts_per_task(t_options, t_ids, remove_both = False):
     """
         t_options: task options as retrieved by database (List of tuples)
@@ -339,300 +320,64 @@ def get_answers_scores_SCO(data_processed, t_ids, db_file_path):
     
     return corr_answers_i, corr_answers_s, corr_answers_a
 
-# ## PAIR PLOTS
-# def get_means_from_traces(traces_dict):
-#     metric = 'mean'
-#     means = {}
-#     for tr_id, data in traces_dict.items():
-#         # convert traces and posterior predictive samples to ArviZ InferenceData objs
-#         infdata = az.from_pymc3(data[0], posterior_predictive = data[1])
-#         # get mean of posteriors
-#         means[tr_id] = az.summary(infdata, var_names=[data[2]], kind='stats')[metric].tolist()
-#     return means
-    
-# def get_data_response_pair_plot(t_ids, traces_dict): 
-#     #means of traces
-#     means_from_traces = get_means_from_traces(traces_dict)
-#     #prepare data
-#     pp_data = {}
-#     pp_data = {'accuracy':means_from_traces['acc_rq1'][:], 
-#                'response_time':means_from_traces['rt_rq1'][:],
-#                'confidence':means_from_traces['conf_rq1'][:],
-#               "Task Type":["T1"]*len(means_from_traces['acc_rq1']),
-#               "task":t_ids['T1'][:],
-#               "color":["skyblue"]*len(t_ids['T1'])
-#               }
-#     pp_data['accuracy'].extend(means_from_traces['acc_rq2'])
-#     pp_data['response_time'].extend(means_from_traces['rt_rq2'])
-#     pp_data['confidence'].extend(means_from_traces['conf_rq2'])
-#     pp_data['task'].extend(t_ids['T2'])
-#     pp_data['color'].extend(["blue"]*len(t_ids['T2']))
-#     pp_data['Task Type'].extend(["T2"]*len(means_from_traces['acc_rq2']))
-    
-#     return pd.DataFrame(pp_data), pp_data
-
-# def get_data_response_interaction_pair_plot(means_from_traces):
-#     # mean of posteriors
-#     mean_acc_rq1 = means_from_traces['acc_rq1']
-#     mean_acc_rq2 = means_from_traces['acc_rq2']
-#     mean_acc_rq3 = means_from_traces['acc_rq3']
-#     mean_rt_rq1  = means_from_traces['rt_rq1']
-#     mean_rt_rq2  = means_from_traces['rt_rq2']
-#     mean_rt_rq3  = means_from_traces['rt_rq3']
-#     mean_conf_rq1 = means_from_traces['conf_rq1']
-#     mean_conf_rq2 = means_from_traces['conf_rq2']
-#     mean_conf_rq3 = means_from_traces['conf_rq3']
-    
-#     mean_acc = [mean_acc_rq1[0],mean_acc_rq2[0],mean_acc_rq2[1],mean_acc_rq2[2], mean_acc_rq3[0],
-#                mean_acc_rq1[1],mean_acc_rq2[3],mean_acc_rq2[4],mean_acc_rq2[5],mean_acc_rq3[1],mean_acc_rq3[2],
-#                mean_acc_rq1[2], mean_acc_rq1[3],mean_acc_rq2[6],mean_acc_rq2[7],mean_acc_rq2[8],mean_acc_rq2[9],mean_acc_rq3[3],mean_acc_rq3[4]]
-#     mean_conf = [mean_conf_rq1[0],mean_conf_rq2[0],mean_conf_rq2[1],mean_conf_rq2[2],mean_conf_rq3[0],
-#                mean_conf_rq1[1],mean_conf_rq2[3],mean_conf_rq2[4],mean_conf_rq2[5],mean_conf_rq3[1],mean_conf_rq3[2],
-#                mean_conf_rq1[2], mean_conf_rq1[3],mean_conf_rq2[6],mean_conf_rq2[7],mean_conf_rq2[8],mean_conf_rq2[9],mean_conf_rq3[3],mean_conf_rq3[4]]
-#     mean_rt = [mean_rt_rq1[0],mean_rt_rq2[0],mean_rt_rq2[1],mean_rt_rq2[2],mean_rt_rq3[0],
-#                mean_rt_rq1[1],mean_rt_rq2[3],mean_rt_rq2[4],mean_rt_rq2[5],mean_rt_rq3[1],mean_rt_rq3[2],
-#                mean_rt_rq1[2], mean_rt_rq1[3],mean_rt_rq2[6],mean_rt_rq2[7],mean_rt_rq2[8],mean_rt_rq2[9],mean_rt_rq3[3],mean_rt_rq3[4]]
-#     #prepare data
-#     #indices = [0,0,0,1,2,3,4,4,4,5,5,5,6,7,8,9,9,9,10,10,10,11,11,11,11,12,12,12,12,13,14,15,16,17,17,18,18]
-#     rq = ["T1"] + ["T2"]*3 + ["T3"] + ["T1"] + ["T2"]*3 + ["T3"]*2 + ["T1"]*2 + ["T2"]*4 + ["T3"]*2
-#     color = ['skyblue','blue','blue','blue',"navy",
-#             'skyblue','blue','blue','blue',"navy","navy",
-#             'skyblue','skyblue','blue','blue','blue','blue',"navy","navy"]
-#     pp_data = {}
-#     pp_data = {'num_boxes':means_from_traces['num_boxes'],
-#                'len_boxes':means_from_traces['len_boxes'],
-#                'accuracy': mean_acc, 
-#                'response_time': mean_rt,
-#                'confidence': mean_conf,
-#                 "Task Type":rq,
-#               'color':color}
-
-#     return pd.DataFrame(pp_data), pp_data
-
-# def get_data_interaction_scatter_plot(means_from_traces):
-#     # prepare data
-#     rq = ["T1"] + ["T2"]*3 + ["T3"] + ["T1"] + ["T2"]*3 + ["T3"]*2 + ["T1"]*2 + ["T2"]*4 + ["T3"]*2
-#     color = ['skyblue','blue','blue','blue',"navy",
-#             'skyblue','blue','blue','blue',"navy","navy",
-#             'skyblue','skyblue','blue','blue','blue','blue',"navy","navy"]
-#     pp_data = {}
-#     pp_data = {'num_boxes':means_from_traces['num_boxes'], 
-#                'len_boxes':means_from_traces['len_boxes'],
-#               'Task Type':rq,
-#               'color':color}
-#     return pd.DataFrame(pp_data)
-
-# ## FOREST PLOT
-# # select the relevant task from the dataset, by name
-# def get_task(datasets, task):    
-#     for s in datasets:        
-#         try:
-#             return s.sel(task=task)
-#         except KeyError:
-#             continue            
-
-# # return a list of flat numpy traces, one per task
-# def join_rqs(rqs, var_name):
-#     datasets = [az.convert_to_dataset(rq)[var_name] 
-#                 for rq in rqs]    
-#     tasks = [np.array(get_task(datasets,  
-#                                task=f"t{i+1}")).ravel() 
-#              for i in range(19)]
-#     return tasks
-
-# def get_data_forest_plot(traces_dict):
-#     # prepare data
-#     forrest_plot_data = {}
-#     forrest_plot_data[0] = {}
-#     forrest_plot_data[0]['title'] = "1.Accuracy IG\n $\it{thetaIG}$"
-#     forrest_plot_data[0]['traces'] = traces_dict['acc']
-#     forrest_plot_data[0]['var'] = "thetaIG"
-#     forrest_plot_data[0]['ref_val'] = 0.5
-#     forrest_plot_data[1] = {}
-#     forrest_plot_data[1]['title'] = "2.Accuracy SG\n $\it{thetaSG}$"
-#     forrest_plot_data[1]['traces'] = traces_dict['acc']
-#     forrest_plot_data[1]['var'] = "thetaSG"
-#     forrest_plot_data[1]['ref_val'] = 0.5
-#     forrest_plot_data[2] = {}
-#     forrest_plot_data[2]['title'] = "3.Accuracy IG-SG\n $\it{diff\_of\_thetas}$"
-#     forrest_plot_data[2]['traces'] = traces_dict['acc']
-#     forrest_plot_data[2]['var'] = "difference of thetas"
-#     forrest_plot_data[2]['ref_val'] = 0
-# #     ####
-# #     forrest_plot_data[3] = {}
-# #     forrest_plot_data[3]['title'] = "Response Times IG\n $\it{groupIG\_mean}$"
-# #     forrest_plot_data[3]['traces'] = traces_dict['rt']
-# #     forrest_plot_data[3]['var'] = "groupIG_mean"
-# #     forrest_plot_data[3]['ref_val'] = 0
-# #     forrest_plot_data[4] = {}
-# #     forrest_plot_data[4]['title'] = "Response Times SG\n $\it{groupSG\_mean}$"
-# #     forrest_plot_data[4]['traces'] = traces_dict['rt']
-# #     forrest_plot_data[4]['var'] = "groupSG_mean"
-# #     forrest_plot_data[4]['ref_val'] = 0
-# #     forrest_plot_data[5] = {}
-# #     forrest_plot_data[5]['title'] = "Response Times IG-SG\n $\it{effect\_size}$"
-# #     forrest_plot_data[5]['traces'] = traces_dict['rt']
-# #     forrest_plot_data[5]['var'] = "effect size"
-# #     forrest_plot_data[5]['ref_val'] = 0
-# #     forrest_plot_data[6] = {}
-# #     forrest_plot_data[6]['title'] = "Confidence IG\n $\it{groupIG\_mean}$"
-# #     forrest_plot_data[6]['traces'] = traces_dict['conf']
-# #     forrest_plot_data[6]['var'] = "groupIG_mean"
-# #     forrest_plot_data[6]['ref_val'] = 0
-# #     forrest_plot_data[7] = {}
-# #     forrest_plot_data[7]['title'] = "Confidence SG\n $\it{groupSG\_mean}$"
-# #     forrest_plot_data[7]['traces'] = traces_dict['conf']
-# #     forrest_plot_data[7]['var'] = "groupSG_mean"
-# #     forrest_plot_data[7]['ref_val'] = 0
-# #     forrest_plot_data[8] = {}
-# #     forrest_plot_data[8]['title'] = "Confidence IG-SG\n $\it{diff\_of\_means}$"
-# #     forrest_plot_data[8]['traces'] = traces_dict['conf']
-# #     forrest_plot_data[8]['var'] = "difference of means"
-# #     forrest_plot_data[8]['ref_val'] = 0
-# #     ####
-#     forrest_plot_data[3] = {}
-#     forrest_plot_data[3]['title'] = "4.Response Times IG-SG\n $\it{effect\_size}$"
-#     forrest_plot_data[3]['traces'] = traces_dict['rt']
-#     forrest_plot_data[3]['var'] = "effect size"
-#     forrest_plot_data[3]['ref_val'] = 0
-#     forrest_plot_data[4] = {}
-#     forrest_plot_data[4]['title'] = "5.Confidence IG-SG\n $\it{diff\_of\_means}$"
-#     forrest_plot_data[4]['traces'] = traces_dict['conf']
-#     forrest_plot_data[4]['var'] = "difference of means"
-#     forrest_plot_data[4]['ref_val'] = 0
-    
-#     if 'num_boxes' in traces_dict:
-#         forrest_plot_data[5] = {}
-#         forrest_plot_data[5]['title'] = "Num Boxes \n mu"
-#         forrest_plot_data[5]['traces'] = traces_dict['num_boxes']
-#         forrest_plot_data[5]['var'] = "mu"
-#         forrest_plot_data[5]['ref_val'] = None
-
-#         forrest_plot_data[6] = {}
-#         forrest_plot_data[6]['title'] = "Num Boxes Obs"
-#         forrest_plot_data[6]['data'] = traces_dict['num_boxes_obs']
-#         forrest_plot_data[6]['ref_val'] = None
-
-#         forrest_plot_data[7] = {}
-#         forrest_plot_data[7]['title'] = "Len Boxes \n mu"
-#         forrest_plot_data[7]['traces'] = traces_dict['len_boxes']
-#         forrest_plot_data[7]['var'] = "mu"
-#         forrest_plot_data[7]['ref_val'] = None
-
-#         forrest_plot_data[8] = {}
-#         forrest_plot_data[8]['title'] = "Len Boxes Obs"
-#         forrest_plot_data[8]['data'] = traces_dict['len_boxes_obs']
-#         forrest_plot_data[8]['ref_val'] = None
-
-#     return forrest_plot_data
-
-# def get_data_ordered_forest_plot(traces_dict):
-#     # prepare data
-#     forrest_plot_data = {}
-#     forrest_plot_data[0] = {}
-#     forrest_plot_data[0] = {}
-#     forrest_plot_data[0]['title'] = "6.Accuracy IG-SG (ordered)\n $\it{diff\_of\_thetas}$"
-#     forrest_plot_data[0]['traces'] = traces_dict['acc']
-#     forrest_plot_data[0]['var'] = "difference of thetas"
-#     forrest_plot_data[0]['ref_val'] = 0
-
-#     forrest_plot_data[1] = {}
-#     forrest_plot_data[1]['title'] = "7.Response Times IG-SG (ordered)\n $\it{effect\_size}$"
-#     forrest_plot_data[1]['traces'] = traces_dict['rt']
-#     forrest_plot_data[1]['var'] = "effect size"
-#     forrest_plot_data[1]['ref_val'] = 0
-    
-#     forrest_plot_data[2] = {}
-#     forrest_plot_data[2]['title'] = "8.Confidence IG-SG (ordered)\n $\it{diff\_of\_means}$"
-#     forrest_plot_data[2]['traces'] = traces_dict['conf']
-#     forrest_plot_data[2]['var'] = "difference of means"
-#     forrest_plot_data[2]['ref_val'] = 0
-
-#     return forrest_plot_data  
-
-# # INTERACTION LOGS NUM OF BOXES
-# def get_num_of_boxes_per_task(data, t_ids):
-#     """
-#         t_ids:       List of task ids ['t1','t2','t3',...]
-#         Returns:     participants number of selection boxes per task {'t1':[],'t2':[],...}
-#     """
-#     num_boxes = {}
-#     for p_id,p in data.items():        
-#         if p['mode'] == "i": 
-#             for t_id in t_ids: 
-#                 if t_id not in num_boxes:
-#                     num_boxes[t_id] = []
-#                 if t_id in p['t_answers']:
-#                     count = 0
-#                     for i, sel in p['t_answers'][t_id]['selections'].items():
-#                         count = count + 1
-#                     num_boxes[t_id].append(count)
-#                 else:
-#                     num_boxes[t_id].append(0)
-#     for t_id in num_boxes:
-#         num_boxes[t_id] = np.array(num_boxes[t_id])
-#     return list(num_boxes.values())
-
-# def get_num_of_boxes_per_participant_per_task(data, t_ids):
-#     """
-#         t_ids:       List of task ids ['t1','t2','t3',...]
-#         Returns:     participants number of selection boxes per task {'t1':[],'t2':[],...}
-#     """
-#     num_boxes = {}
-#     for p_id,p in data.items():        
-#         if p['mode'] == "i": 
-#             if p_id not in num_boxes:
-#                 num_boxes[p_id] = {}
-#             for t_id in t_ids: 
-#                 if t_id not in num_boxes[p_id]:
-#                     num_boxes[p_id][t_id] = []
-#                 if t_id in p['t_answers']:
-#                     count = 0
-#                     for i, sel in p['t_answers'][t_id]['selections'].items():
-#                         count = count + 1
-#                     num_boxes[p_id][t_id] = count
-#                 else:
-#                     num_boxes[p_id][t_id] = 0
-#     return num_boxes
-
-# # INTERACTION LOGS LENGTH OF BOXES
-# def get_len_of_boxes_per_task(data, p_tasks, p_vars, p_inference):
-#     """
-#         t_ids:       List of task ids ['t1','t2','t3',...]
-#         Returns:     participants number of selection boxes per task {'t1':[],'t2':[],...}
-#     """
-#     ## estimate normalization factor of each variable in each problem
-#     p_norm_factors = {}   
-#     for p, inference in p_inference.items():
-#         inf_dat = json.loads(inference['header.json'])["inference_data"]
-#         if p not in p_norm_factors:
-#             p_norm_factors[p] = {}
-#         for var in p_vars[p]:
-#             if var in inf_dat['prior']['vars']:
-#                 p_array_names = inf_dat['prior']["array_names"]
-#             elif var in inf_dat['prior_predictive']['vars']:
-#                 p_array_names = inf_dat['prior_predictive']["array_names"]
-#             prior_samples = np.squeeze(inference[p_array_names[var]])
-#             if p == 'p3' and len(prior_samples.shape)>1:
-#                 prior_samples = prior_samples[:,2]
-#             max_v = prior_samples.max()
-#             min_v = prior_samples.min()
-#             diff = max_v - min_v
-#             p_norm_factors[p][var] =  (max_v+0.1*diff) - (min_v - 0.1*diff)
-# #             hdi = az.hdi(prior_samples, hdi_prob=.94)
-# #             p_norm_factors[p][var] =  hdi[1] - hdi[0]
-#     len_boxes = {}
-#     for p_id,p in data.items():        
-#         if p['mode'] == "i": 
-#             for prob in p_tasks:
-#                 for t_id in p_tasks[prob]: 
-#                     if t_id not in len_boxes:
-#                         len_boxes[t_id] = []
-#                     if t_id in p['t_answers']:
-#                         for i, sel in p['t_answers'][t_id]['selections'].items():
-#                             len_boxes[t_id].append((sel['xmax']-sel['xmin'])/p_norm_factors[prob][sel["var_name"]])
-#                     else:
-#                         len_boxes[t_id].append(0.)
-#     for t_id in len_boxes:
-#         len_boxes[t_id] = np.array(len_boxes[t_id])
-#     return list(len_boxes.values())
+def add_to_data_T1(data, task_types, answers,answers_multi, answ_demo, times,confidence,mode,participants):
+    for t in answers:
+        ## 'IG', 'AG', or 'SG'
+        data['accuracy'].extend(answers[t])
+        data['accuracy_ham'].extend(answers_multi[t])
+        data['time'].extend(times[t])
+        data['conf'].extend(confidence[t])
+        data['condition'].extend([mode]*len(answers[t]))
+        data['task'].extend([t]*len(answers[t]))
+        data['participant'].extend(participants)
+        data['intervention'].extend([task_types[t]]*len(answers[t]))
+        data['d1'].extend(answ_demo['d1'])
+        data['d2'].extend(answ_demo['d2'])
+        data['d3'].extend(answ_demo['d3'])
+        data['d4'].extend(answ_demo['d4'])
+        data['d5'].extend(answ_demo['d5'])
+        ## 'all'
+        data['accuracy'].extend(answers[t])
+        data['accuracy_ham'].extend(answers_multi[t])
+        data['time'].extend(times[t])
+        data['conf'].extend(confidence[t])
+        data['condition'].extend(['all']*len(answers[t]))
+        data['task'].extend([t]*len(answers[t]))
+        data['participant'].extend(participants)
+        data['intervention'].extend([task_types[t]]*len(answers[t]))
+        data['d1'].extend(answ_demo['d1'])
+        data['d2'].extend(answ_demo['d2'])
+        data['d3'].extend(answ_demo['d3'])
+        data['d4'].extend(answ_demo['d4'])
+        data['d5'].extend(answ_demo['d5'])
+        
+def add_to_data_T2_model(data, task_types, answers, answ_intervention, answ_demo, times,confidence,mode,participants):
+    for t in answers:
+        ## 'IG', 'AG', or 'SG'
+        data['accuracy'].extend(answers[t])
+        data['accuracy_intervention'].extend(answ_intervention[t])
+        data['time'].extend(times[t])
+        data['conf'].extend(confidence[t])
+        data['condition'].extend([mode]*len(answers[t]))
+        data['task'].extend([t]*len(answers[t]))
+        data['participant'].extend(participants)
+        data['intervention'].extend([task_types[t]]*len(answers[t]))
+        data['d1'].extend(answ_demo['d1'])
+        data['d2'].extend(answ_demo['d2'])
+        data['d3'].extend(answ_demo['d3'])
+        data['d4'].extend(answ_demo['d4'])
+        data['d5'].extend(answ_demo['d5'])
+        ## 'all'
+        data['accuracy'].extend(answers[t])
+        data['accuracy_intervention'].extend(answ_intervention[t])
+        data['time'].extend(times[t])
+        data['conf'].extend(confidence[t])
+        data['condition'].extend(['all']*len(answers[t]))
+        data['task'].extend([t]*len(answers[t]))
+        data['participant'].extend(participants)
+        data['intervention'].extend([task_types[t]]*len(answers[t]))
+        data['d1'].extend(answ_demo['d1'])
+        data['d2'].extend(answ_demo['d2'])
+        data['d3'].extend(answ_demo['d3'])
+        data['d4'].extend(answ_demo['d4'])
+        data['d5'].extend(answ_demo['d5'])
