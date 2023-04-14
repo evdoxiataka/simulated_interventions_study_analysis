@@ -1,4 +1,4 @@
-from .utils import create_connection, close_connection
+from utils import create_connection, close_connection
 
 from sqlite3 import Error
 import numpy as np
@@ -642,9 +642,9 @@ def get_questions(db_file):
     return qa
 
 if __name__ == '__main__':
-    database = "/data/study_02.db"
+    database = "data/study_02.db"
     # print(get_p_t(database))
-    print(get_t_answers(database))    
+    # print(get_t_answers(database))    
     # print(get_t_answers_opts(database))
     # print(get_t_answers_intervention_selection(database))
     print(get_interactive_modes_count(database))
