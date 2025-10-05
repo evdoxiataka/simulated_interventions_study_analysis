@@ -1,4 +1,4 @@
-from utils import create_connection, close_connection
+from .utils import create_connection, close_connection
 
 from sqlite3 import Error
 import numpy as np

@@ -1,4 +1,4 @@
-import pymc3 as pm
+import pymc as pm
 import numpy as np
 
 def get_times_inference_LA1(times, t_indices, t_ids):
@@ -8,15 +8,15 @@ def get_times_inference_LA1(times, t_indices, t_ids):
     coords = {"task": t_ids}
     with pm.Model(coords=coords) as model:
         ## priors
-        group_mean = pm.Normal("group_mean", mu = 120, sd = 50, dims = 'task')
-        group_std = pm.HalfNormal("group_std", sd = 50, dims = 'task')
+        group_mean = pm.Normal("group_mean", mu = 120, sigma = 50, dims = 'task')
+        group_std = pm.HalfNormal("group_std", sigma = 50, dims = 'task')
 
         ## likelihood  
-        rt = pm.Normal("rt", mu = group_mean[t_indices], sd = group_std[t_indices], observed = times)# sec
+        rt = pm.Normal("rt", mu = group_mean[t_indices], sigma = group_std[t_indices], observed = times)# sec
         
         #inference
         trace = pm.sample(2000)
-        posterior_predictive = pm.sample_posterior_predictive(trace, samples=2000)
+        posterior_predictive = pm.sample_posterior_predictive(trace)#, samples=2000
     return trace, posterior_predictive
 
 def get_times_inference_LA2(times_i, times_s, times_a, t_indices_i, t_indices_s, t_indices_a, t_ids):
@@ -26,19 +26,19 @@ def get_times_inference_LA2(times_i, times_s, times_a, t_indices_i, t_indices_s,
     coords = {"task": t_ids}
     with pm.Model(coords=coords) as model:
         ## priors
-        groupIG_mean = pm.Normal("groupIG_mean", mu = 120, sd = 50, dims = 'task')
-        groupIG_std = pm.HalfNormal("groupIG_std", sd = 50, dims = 'task')
+        groupIG_mean = pm.Normal("groupIG_mean", mu = 120, sigma = 50, dims = 'task')
+        groupIG_std = pm.HalfNormal("groupIG_std", sigma = 50, dims = 'task')
         
-        groupSG_mean = pm.Normal("groupSG_mean", mu = 120, sd = 50, dims = 'task')        
-        groupSG_std = pm.HalfNormal("groupSG_std", sd = 50, dims = 'task')
+        groupSG_mean = pm.Normal("groupSG_mean", mu = 120, sigma = 50, dims = 'task')        
+        groupSG_std = pm.HalfNormal("groupSG_std", sigma = 50, dims = 'task')
         
-        groupAG_mean = pm.Normal("groupAG_mean", mu = 120, sd = 50, dims = 'task')        
-        groupAG_std = pm.HalfNormal("groupAG_std", sd = 50, dims = 'task')
+        groupAG_mean = pm.Normal("groupAG_mean", mu = 120, sigma = 50, dims = 'task')        
+        groupAG_std = pm.HalfNormal("groupAG_std", sigma = 50, dims = 'task')
 
         ## likelihood  
-        rtIG = pm.Normal("rtIG", mu = groupIG_mean[t_indices_i], sd = groupIG_std[t_indices_i], observed = times_i)# sec
-        rtSG = pm.Normal("rtSG", mu = groupSG_mean[t_indices_s], sd = groupSG_std[t_indices_s], observed = times_s)# sec
-        rtAG = pm.Normal("rtAG", mu = groupAG_mean[t_indices_a], sd = groupAG_std[t_indices_a], observed = times_a)# sec
+        rtIG = pm.Normal("rtIG", mu = groupIG_mean[t_indices_i], sigma = groupIG_std[t_indices_i], observed = times_i)# sec
+        rtSG = pm.Normal("rtSG", mu = groupSG_mean[t_indices_s], sigma = groupSG_std[t_indices_s], observed = times_s)# sec
+        rtAG = pm.Normal("rtAG", mu = groupAG_mean[t_indices_a], sigma = groupAG_std[t_indices_a], observed = times_a)# sec
         
         ## comparisons
         diff_of_means_IG_SG = pm.Deterministic("difference of means IG-SG", groupIG_mean - groupSG_mean, dims = 'task')
@@ -52,7 +52,7 @@ def get_times_inference_LA2(times_i, times_s, times_a, t_indices_i, t_indices_s,
         
         #inference
         trace = pm.sample(2000)
-        posterior_predictive = pm.sample_posterior_predictive(trace, samples=2000)
+        posterior_predictive = pm.sample_posterior_predictive(trace)#, samples=2000
     return trace, posterior_predictive
 
 def get_confidence_inference_LA1(conf, t_indices, t_ids):
@@ -62,15 +62,15 @@ def get_confidence_inference_LA1(conf, t_indices, t_ids):
     coords = {"task": t_ids}
     with pm.Model(coords=coords) as model:
         ## priors
-        group_mean = pm.Normal("group_mean", mu = 0, sd = 1, dims = 'task')
-        group_std = pm.HalfNormal("group_std", sd = 1, dims = 'task')
+        group_mean = pm.Normal("group_mean", mu = 0, sigma = 1, dims = 'task')
+        group_std = pm.HalfNormal("group_std", sigma = 1, dims = 'task')
 
         ## likelihood  
-        conf = pm.Normal("conf", mu = group_mean[t_indices], sd = group_std[t_indices], observed = conf)# sec
+        conf = pm.Normal("conf", mu = group_mean[t_indices], sigma = group_std[t_indices], observed = conf)# sec
         
         ## inference
         trace = pm.sample(2000)
-        posterior_predictive = pm.sample_posterior_predictive(trace, samples=2000)
+        posterior_predictive = pm.sample_posterior_predictive(trace)
     return trace, posterior_predictive
 
 def get_confidence_inference_LA2(conf_i, conf_s, conf_a, t_indices_i, t_indices_s, t_indices_a, t_ids):
@@ -80,19 +80,19 @@ def get_confidence_inference_LA2(conf_i, conf_s, conf_a, t_indices_i, t_indices_
     coords = {"task": t_ids}
     with pm.Model(coords=coords) as model:
         ## priors
-        groupIG_mean = pm.Normal("groupIG_mean", mu = 0, sd = 1, dims = 'task')
-        groupIG_std = pm.HalfNormal("groupIG_std", sd = 1, dims = 'task')
+        groupIG_mean = pm.Normal("groupIG_mean", mu = 0, sigma = 1, dims = 'task')
+        groupIG_std = pm.HalfNormal("groupIG_std", sigma = 1, dims = 'task')
         
-        groupSG_mean = pm.Normal("groupSG_mean", mu = 0, sd = 1, dims = 'task')        
-        groupSG_std = pm.HalfNormal("groupSG_std", sd = 1, dims = 'task')
+        groupSG_mean = pm.Normal("groupSG_mean", mu = 0, sigma = 1, dims = 'task')        
+        groupSG_std = pm.HalfNormal("groupSG_std", sigma = 1, dims = 'task')
         
-        groupAG_mean = pm.Normal("groupAG_mean", mu = 0, sd = 1, dims = 'task')        
-        groupAG_std = pm.HalfNormal("groupAG_std", sd = 1, dims = 'task')
+        groupAG_mean = pm.Normal("groupAG_mean", mu = 0, sigma = 1, dims = 'task')        
+        groupAG_std = pm.HalfNormal("groupAG_std", sigma = 1, dims = 'task')
 
         ## likelihood  
-        confIG = pm.Normal("confIG", mu = groupIG_mean[t_indices_i], sd = groupIG_std[t_indices_i], observed = conf_i)# sec
-        confSG = pm.Normal("confSG", mu = groupSG_mean[t_indices_s], sd = groupSG_std[t_indices_s], observed = conf_s)# sec
-        confAG = pm.Normal("confAG", mu = groupAG_mean[t_indices_a], sd = groupAG_std[t_indices_a], observed = conf_a)# sec
+        confIG = pm.Normal("confIG", mu = groupIG_mean[t_indices_i], sigma = groupIG_std[t_indices_i], observed = conf_i)# sec
+        confSG = pm.Normal("confSG", mu = groupSG_mean[t_indices_s], sigma = groupSG_std[t_indices_s], observed = conf_s)# sec
+        confAG = pm.Normal("confAG", mu = groupAG_mean[t_indices_a], sigma = groupAG_std[t_indices_a], observed = conf_a)# sec
         
         ## comparisons
         diff_of_means_IG_SG = pm.Deterministic("difference of means IG-SG", groupIG_mean - groupSG_mean, dims = 'task')
@@ -105,7 +105,7 @@ def get_confidence_inference_LA2(conf_i, conf_s, conf_a, t_indices_i, t_indices_
         effect_size_SG_AG = pm.Deterministic("effect size SG-AG", diff_of_means_SG_AG / np.sqrt((groupSG_std ** 2 + groupAG_std ** 2) / 2), dims = 'task')
         ## inference
         trace = pm.sample(2000)
-        posterior_predictive = pm.sample_posterior_predictive(trace, samples=2000)
+        posterior_predictive = pm.sample_posterior_predictive(trace)
     return trace, posterior_predictive
 
 def get_inference_SCO_LA1(answers, t_indices, t_ids):
@@ -123,7 +123,7 @@ def get_inference_SCO_LA1(answers, t_indices, t_ids):
         
         #inference
         trace = pm.sample(2000)
-        posterior_predictive = pm.sample_posterior_predictive(trace, samples=2000)
+        posterior_predictive = pm.sample_posterior_predictive(trace)
     return trace, posterior_predictive
 
 def get_inference_MCO_LA1(answers, n, t_indices, t_ids):
@@ -143,7 +143,7 @@ def get_inference_MCO_LA1(answers, n, t_indices, t_ids):
        
         ## inference
         trace = pm.sample(2000)
-        posterior_predictive = pm.sample_posterior_predictive(trace, samples=2000)
+        posterior_predictive = pm.sample_posterior_predictive(trace)
     return trace, posterior_predictive
 
 
@@ -202,7 +202,7 @@ def get_inference_MCO_LA2(answers_i, answers_s, answers_a, n_i, n_s, n_a, t_indi
        
         #inference
         trace = pm.sample(2000)
-        posterior_predictive = pm.sample_posterior_predictive(trace, samples=2000)
+        posterior_predictive = pm.sample_posterior_predictive(trace)
     return trace, posterior_predictive
 
 # def get_inference_multi_conf(answers_i, answers_s, answers_a, conf_i, conf_s, conf_a, n_i, n_s, n_a, t_indices_i, t_indices_s, t_indices_a, t_ids):
@@ -280,7 +280,7 @@ def get_inference_SCO_LA2(answers_i, answers_s, answers_a, t_indices_i, t_indice
         
         #inference
         trace = pm.sample(2000)
-        posterior_predictive = pm.sample_posterior_predictive(trace, samples=2000)
+        posterior_predictive = pm.sample_posterior_predictive(trace)
     return trace, posterior_predictive
 
 # def get_inference_sinlg_part(answers, t_indices, t_ids):
